@@ -50,7 +50,7 @@ jobs:
       - aws-s3/copy:
           from: build
           to: "s3://react-docker-circle"
-          overwrite: true
+          # overwrite: true
 
 workflows:
   version: 2
