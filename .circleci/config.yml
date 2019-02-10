@@ -4,7 +4,7 @@
 #
 version: 2.1
 orbs:
-  aws-s3: circleci/aws-s3@1.0.3
+  aws-s3: circleci/aws-s3@1.0.0
 jobs:
   build:
     docker:
@@ -43,7 +43,6 @@ jobs:
       - aws-s3/sync:
           from: /build
           to: "s3://react-docker-circle"
-          configure-default-region: false
           overwrite: true
 
 workflows:
