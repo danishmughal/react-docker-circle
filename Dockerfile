@@ -1,7 +1,7 @@
 # Production Dockerfile
 
 # 1. Build Phase
-FROM node:alpine AS builder
+FROM node:11.9-alpine AS builder
 WORKDIR '/app'
 COPY package.json .
 RUN yarn install 
