@@ -42,7 +42,9 @@ jobs:
           command: docker build -t danishmughal/react-docker-circle .
       - run:
           name: Extract build assets
-          command: docker cp danishmughal/react-docker-circle:/build /build
+          command: |
+            docker create -it --name prod danishmughal/react-docker-circle bash
+            docker cp prod:/build /build
       - aws-s3/sync:
           from: /build
           to: "s3://react-docker-circle"
