@@ -12,7 +12,7 @@ class App extends Component {
             Edit <code>src/App.js</code> and save to reload!
           </p>
           <p>Test auto-deploy</p>
-          <p>Change on staging to be merged</p>
+          <p>Feature test</p>
           <a
             className="App-link"
             href="https://reactjs.org"
