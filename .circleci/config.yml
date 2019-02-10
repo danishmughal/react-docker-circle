@@ -53,7 +53,7 @@ jobs:
               aws cloudfront create-invalidation --distribution-id "${PRODUCTION_DISTRIBUTION_ID}" --paths /index.html
             elif [ "${CIRCLE_BRANCH}" == "staging" ]; then
               aws s3 sync app/build/ s3://${STAGING_BUCKET} --delete
-              aws cloudfront create-invalidation --distribution-id "${STAGING_DISTREBUTION_ID}" --paths /index.html
+              aws cloudfront create-invalidation --distribution-id "${STAGING_DISTRIBUTION_ID}" --paths /index.html
             fi
 
 workflows:
