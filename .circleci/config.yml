@@ -43,10 +43,10 @@ jobs:
       - run:
           name: Extract build assets
           command: |
-            mkdir /build
-            chown -R $USER:$USER /build
+            mkdir build
+            chown -R $USER:$USER build
             docker create -it --name prod danishmughal/react-docker-circle bash
-            docker cp prod:/build /build
+            docker cp prod:/build build
       - aws-s3/sync:
           from: /build
           to: "s3://react-docker-circle"
