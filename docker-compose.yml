@@ -1,0 +1,26 @@
+version: "3"
+
+services:
+  development:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # Node modules folder built inside container
+      - /app/node_modules
+      # Map local code to container
+      - .:/app
+    tty: true
+  production:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      # Node modules folder built inside container
+      - /app/node_modules
+      # Map local code to container
+      - .:/app
