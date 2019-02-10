@@ -43,8 +43,7 @@ jobs:
       - aws-s3/sync:
           from: /build
           to: "s3://react-docker-circle"
-          arguments:
-            configure-default-region: false
+          configure-default-region: false
           overwrite: true
 
 workflows:
