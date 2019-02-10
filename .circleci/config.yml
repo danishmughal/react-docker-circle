@@ -48,10 +48,12 @@ jobs:
             echo "[profile eb-cli]" > ~/.aws/config
             echo "aws_access_key_id=$AWS_ACCESS_KEY_ID" >> ~/.aws/config
             echo "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" >> ~/.aws/config
+            echo "region=us-west-2" >> ~/.aws/config
       - run:
           name: Deploy to EB if branch is Master
           command: |
-            eb use ReactDockerCircleProduction-env --profile eb-cli --region us-west-2
+            eb init --profile eb-cli
+            eb use ReactDockerCircleProduction-env
             eb deploy -v --staged --profile eb-cli
 
 workflows:
