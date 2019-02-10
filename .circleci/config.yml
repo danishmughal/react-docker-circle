@@ -51,7 +51,7 @@ jobs:
       - run:
           name: Deploy to EB if branch is Master
           command: |
-            eb use react-docker-circle-production --profile eb-cli --region us-west-2
+            eb use ReactDockerCircleProduction-env --profile eb-cli --region us-west-2
             eb deploy -v --staged --profile eb-cli
 
 workflows:
