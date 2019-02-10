@@ -53,10 +53,10 @@ workflows:
     jobs:
       - build
       - deploy:
-        requires:
-          - build
-        filters:
-          branches:
-            only:
-              - master
-              - staging
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
+                - staging
