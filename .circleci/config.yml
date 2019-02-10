@@ -33,7 +33,7 @@ jobs:
 
       - run:
           name: Run tests
-          command: docker run danishmughal/react-docker-circle npm run test -- --coverage
+          command: docker run danishmughal/react-docker-circle yarn test -- --coverage
 #       - run:
 #           name: Push
 #           command: |
