@@ -26,7 +26,7 @@ jobs:
       - PRODUCTION_BUCKET: react-docker-circle
       - PRODUCTION_DISTRIBUTION_ID: E1EJ4WMCAZLRIN
       - STAGING_BUCKET: react-docker-circle-staging
-      - STAGING_DISTRIBUTION_ID: staging-distribution
+      - STAGING_DISTRIBUTION_ID: E2SLUS0T8BWHYH
     steps:
       - checkout
       - setup_remote_docker
@@ -45,8 +45,6 @@ jobs:
       - run: sudo curl -O https://bootstrap.pypa.io/get-pip.py
       - run: sudo python get-pip.py
       - run: sudo pip install awscli --upgrade
-      - run: aws --version
-      - run: aws s3 ls
       - run:
           name: "Deploy to S3"
           command: |
