@@ -45,6 +45,7 @@ jobs:
           command: |
             chown -R $USER:$USER /build
             docker create -it --name prod danishmughal/react-docker-circle bash
+            mkdir /build
             docker cp prod:/build /build
       - aws-s3/sync:
           from: /build
