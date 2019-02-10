@@ -43,12 +43,12 @@ jobs:
       - run:
           name: Extract build assets
           command: |
-            mkdir build
-            chown -R $USER:$USER build
+            mkdir app
+            chown -R $USER:$USER app
             docker create -it --name prod danishmughal/react-docker-circle bash
-            docker cp prod:/build build
+            docker cp prod:/build app
       - aws-s3/copy:
-          from: build
+          from: app/build
           to: "s3://react-docker-circle"
           arguments: "--recursive"
           # overwrite: true
