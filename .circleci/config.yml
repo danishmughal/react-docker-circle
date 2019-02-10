@@ -2,38 +2,31 @@
 #
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/node:11.9
 version: 2.1
-orbs:
-  aws-s3: circleci/aws-s3@1.0.0
 jobs:
-  build:
-    docker:
-      # specify the version you desire here
-      - image: circleci/node:11.9
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
-
-    working_directory: ~/repo
-
+  build_and_test:
+    <<: *defaults
     steps:
       - checkout
-
       - setup_remote_docker
-
       - run:
-          name: Build
+          name: Build Docker testing environment
           command: docker build -t danishmughal/react-docker-circle -f Dockerfile.dev .
-
       - run:
           name: Run tests
           command: docker run danishmughal/react-docker-circle yarn test --coverage
 
   deploy:
-    docker:
-      - image: "circleci/python:2.7"
+    <<: *defaults
+    environment:
+      - PRODUCTION_BUCKET: react-docker-circle
+      - PRODUCTION_DISTRIBUTION_ID: E1EJ4WMCAZLRIN
+      - STAGING_BUCKET: react-docker-circle-staging
+      - STAGING_DISTRIBUTION_ID: staging-distribution
     steps:
       - checkout
       - setup_remote_docker
@@ -41,26 +34,38 @@ jobs:
           name: Build production assets
           command: docker build -t danishmughal/react-docker-circle .
       - run:
-          name: Extract build assets
+          name: Extract build assets from container
           command: |
             mkdir app
             chown -R $USER:$USER app
             docker create -it --name prod danishmughal/react-docker-circle bash
             docker cp prod:/build app
-      - aws-s3/copy:
-          from: app/build
-          to: "s3://react-docker-circle"
-          arguments: "--recursive"
-          # overwrite: true
+      # S3 Deploy process
+      - run: sudo apt-get update && sudo apt-get install -y python-dev
+      - run: sudo curl -O https://bootstrap.pypa.io/get-pip.py
+      - run: sudo python get-pip.py
+      - run: sudo pip install awscli --upgrade
+      - run: aws --version
+      - run: aws s3 ls
+      - run:
+          name: "Deploy to S3"
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              aws s3 sync app/build/ s3://${PRODUCTION_BUCKET} --delete
+              aws cloudfront create-invalidation --distribution-id "${PRODUCTION_DISTRIBUTION_ID}" --paths /index.html
+            elif [ "${CIRCLE_BRANCH}" == "staging" ]; then
+              aws s3 sync app/build/ s3://${STAGING_BUCKET} --delete
+              aws cloudfront create-invalidation --distribution-id "${STAGING_DISTREBUTION_ID}" --paths /index.html
+            fi
 
 workflows:
   version: 2
-  build-deploy:
+  build-test-deploy:
     jobs:
-      # - build
+      - build_and_test
       - deploy:
-          # requires:
-          #   - build
+          requires:
+            - build_and_test
           filters:
             branches:
               only:
