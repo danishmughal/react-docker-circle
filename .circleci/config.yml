@@ -22,86 +22,51 @@ jobs:
       - setup_remote_docker
 
       - run:
-          name: Install AWS CLI
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y awscli
-
-      - run:
           name: Build
           command: docker build -t danishmughal/react-docker-circle -f Dockerfile.dev .
 
       - run:
           name: Run tests
           command: docker run danishmughal/react-docker-circle yarn test --coverage
-#       - run:
-#           name: Push
-#           command: |
-#             docker login -u$DOCKERHUB_LOGIN -p$DOCKERHUB_PASSWORD
-#             docker tag mlabouardy/avengers:latest mlabouardy/avengers:${CIRCLE_SHA1}
-#             docker push mlabouardy/avengers:latest
-#             docker push mlabouardy/avengers:${CIRCLE_SHA1}
 
-#       - run:
-#           name: Deploy
-#           command: |
-#             zip -r deployment-${CIRCLE_SHA1}.zip .
-#             aws s3 cp deployment-${CIRCLE_SHA1}.zip s3://avengers-docker-eb --region eu-west-3
-#             aws elasticbeanstalk create-application-version --application-name avengers \
-#                 --version-label ${CIRCLE_SHA1} --source-bundle S3Bucket="avengers-docker-eb",S3Key="deployment-${CIRCLE_SHA1}.zip" --region eu-west-3
-#             aws elasticbeanstalk update-environment --application-name avengers \
-#                 --environment-name staging --version-label ${CIRCLE_SHA1} --region eu-west-3
+      - run:
+          name: Install AWS CLI
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y awscli
 
-#       # Download and cache dependencies
-#       - restore_cache:
-#           keys:
-#             - v1-dependencies-{{ checksum "package.json" }}
-#             # fallback to using the latest cache if no exact match is found
-#             - v1-dependencies-
+  deploy:
+    docker:
+      - image: circleci/python:2.7
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Install awscli
+          command: |
+            sudo pip install awsebcli --upgrade
+      - run:
+          name: Create AWS credentials manually
+          command: |
+            mkdir ~/.aws
+            touch ~/.aws/config
+            chmod 600 ~/.aws/config
+            echo "[profile eb-cli]" > ~/.aws/config
+            echo "aws_access_key_id=$AWS_ACCESS_KEY_ID" >> ~/.aws/config
+            echo "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" >> ~/.aws/config
+      - run:
+          name: Deploy to EB if branch is Master
+          command: |
+            eb use react-docker-circle-production --profile eb-cli
+            eb deploy -v --staged --profile eb-cli
 
-#       - run: yarn install
-
-#       - save_cache:
-#           paths:
-#             - node_modules
-#           key: v1-dependencies-{{ checksum "package.json" }}
-
-#       # run tests!
-#       - run: yarn test
-
-#   deploy:
-#     docker:
-#       - image: circleci/python:2.7
-#     working_directory: ~/repo
-#     steps:
-#       - checkout
-#       - run:
-#           name: Install awscli
-#           command: |
-#             sudo pip install awsebcli --upgrade
-#       - run:
-#           name: Create AWS credentials manually
-#           command: |
-#             mkdir ~/.aws
-#             touch ~/.aws/config
-#             chmod 600 ~/.aws/config
-#             echo "[profile eb-cli]" > ~/.aws/config
-#             echo "aws_access_key_id=$AWS_ACCESS_KEY_ID" >> ~/.aws/config
-#             echo "aws_secret_access_key=$AWS_SECRET_ACCESS_KEY" >> ~/.aws/config
-#       - run:
-#           name: Deploy to EB if branch is Master
-#           command: |
-#             eb use circleci-beanstalk-example --profile eb-cli
-#             eb deploy -v --staged --profile eb-cli
-
-# workflows:
-#   version: 2
-#   build-and-deploy:
-#     jobs:
-#       - build
-#       - deploy:
-#           requires:
-#             - build
-#           filters:
-#             branches:
-#               only: master
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - deploy:
+          filters:
+            branches:
+              only:
+                - master
+                - staging
