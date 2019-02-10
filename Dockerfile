@@ -8,7 +8,8 @@ RUN yarn install
 COPY . .
 RUN yarn build
 
-# 2. Run Phase
+# 2. Running Production assets
 FROM nginx:alpine
 EXPOSE 80
+COPY --from=builder /app/build /build
 COPY --from=builder /app/build /usr/share/nginx/html
